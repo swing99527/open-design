@@ -1,0 +1,98 @@
+{
+  "skill_name": "toy-productizer",
+  "evals": [
+    {
+      "id": "fixture-a-zh-robot-keychain",
+      "prompt": "我们有一款普通机器人钥匙扣，老客户发来一张复古航天机器人参考图，想做博物馆礼品店可卖的新品，零售价 15 美元以内，但不要太像原图。不要毛绒。",
+      "prompt_file": "../examples/robot-museum-keychain/brief.zh.md",
+      "expected_output": "Chinese customer-readable proposal with 2-4 non-plush robot keychain directions for a museum gift shop, under-USD-15 target labeled unconfirmed, non-copy differentiation, 3-5 feedback questions, and the validation-only boundary.",
+      "expected_output_file": "../examples/robot-museum-keychain/expected.zh.md",
+      "assertions": [
+        "The output is Chinese unless the user asks otherwise.",
+        "The output contains 2-4 creative directions.",
+        "The output does not propose plush or 毛绒.",
+        "The output fits a museum gift shop context.",
+        "The target retail under USD 15 is labeled as an unconfirmed assumption.",
+        "The output differentiates from the reference instead of copying it.",
+        "The output is a customer-readable Proposal Artifact.",
+        "The output includes 3-5 feedback questions.",
+        "The output includes the validation-only boundary."
+      ],
+      "forbidden_terms": [
+        "supplier-ready",
+        "quotation-ready",
+        "production-ready",
+        "final design",
+        "infringement-safe",
+        "IP safe",
+        "IP-safe",
+        "IP unique",
+        "IP Unique",
+        "copyright-safe",
+        "copyright cleared",
+        "copyright conflicts",
+        "character-copyright conflicts",
+        "avoids copyright conflicts",
+        "无侵权",
+        "可直接量产",
+        "正式报价"
+      ]
+    },
+    {
+      "id": "fixture-b-en-us-museum-buyer",
+      "prompt": "A US museum buyer wants a retro space robot collectible for the gift shop. It should feel educational, be easy to display near the checkout counter, and stay under a $15 retail price. Please avoid copying the reference robot silhouette.",
+      "prompt_file": "../examples/english-buyer-brief/brief.en.md",
+      "expected_output": "English customer proposal with a recommended retro space robot direction, SKU or lineup logic, assumptions and missing information, non-copy reference differentiation, and the validation-only boundary.",
+      "expected_output_file": "../examples/english-buyer-brief/expected.en.md",
+      "assertions": [
+        "The output is English.",
+        "The output is a customer proposal, not internal-only analysis.",
+        "The output includes a recommended direction with rationale.",
+        "The output includes SKU or lineup logic.",
+        "The output includes assumptions and missing information.",
+        "The output includes the validation-only boundary."
+      ],
+      "forbidden_terms": [
+        "supplier-ready",
+        "quotation-ready",
+        "production-ready",
+        "final design",
+        "infringement-safe",
+        "IP safe",
+        "IP-safe",
+        "IP unique",
+        "IP Unique",
+        "copyright-safe",
+        "copyright cleared",
+        "copyright conflicts",
+        "character-copyright conflicts",
+        "avoids copyright conflicts",
+        "无侵权",
+        "可直接量产",
+        "正式报价"
+      ]
+    },
+    {
+      "id": "fixture-c-patch-no-plush-figurine",
+      "prompt": "不要毛绒，改成机器人手办。适合博物馆礼品店。",
+      "expected_output": "Patch the existing proposal into a museum gift shop robot figurine direction while preserving the no-plush hard constraint and recording versioned changed sections.",
+      "assertions": [
+        "The existing proposal is patched instead of regenerated from scratch.",
+        "The hard constraint no plush or 不要毛绒 is preserved.",
+        "The product form changes to robot figurine or 机器人手办.",
+        "The proposal version history records changed sections."
+      ]
+    },
+    {
+      "id": "fixture-d-low-strength-feedback",
+      "prompt": "销售说客户觉得 interesting，但没有问价格、数量、样品或时间。",
+      "expected_output": "Record the feedback as low strength without advancing to validated_interest or any handoff-ready state.",
+      "assertions": [
+        "The feedback is recorded.",
+        "The feedback strength is low.",
+        "The system does not advance to validated_interest.",
+        "The system does not mark handoff-ready."
+      ]
+    }
+  ]
+}

@@ -44,6 +44,8 @@ Match the user's chat language. When the user is writing in non-English, every l
 
 Default-router exception: when the Active plugin / Active skill is \`od-default\` or "Default design router", replace the generic \`discovery\` form with the exact \`<question-form id="task-type">\` form below on turn 1. Do not rename, tailor, drop, reorder, or rewrite the \`taskType\` options; the user did not choose a Home chip yet, so this form is the missing chip selection. This form is intentionally a **single-shot brief** — it asks the routing question (\`taskType\`) and the core discovery fields (audience, brand, scale, constraints) in one batch so the user only sees one clarification card. After the user answers \`[form answers — task-type]\`, treat the chosen task type as the route and **do NOT emit a second \`<question-form id="discovery">\` / "Quick brief — 30 seconds" form** for that turn — the brief is already locked. Proceed directly to RULE 2 (treating the submitted \`brand\` value the same way as a \`discovery\` answer) and then RULE 3.
 
+Plugin-specific discovery exception: if a later Active skill or Active plugin block provides an explicit **first-turn discovery form contract**, use that plugin-specific form instead of the default "Quick brief — 30 seconds" form. This does not let the plugin skip RULE 1; it only replaces the generic output/platform/audience/tone/brand/scale questions with domain-specific questions. Keep \`id="discovery"\` unless the plugin contract explicitly names another id, emit exactly one \`<question-form>\`, and stop.
+
 \`\`\`
 <question-form id="task-type" title="Choose the task type">
 {

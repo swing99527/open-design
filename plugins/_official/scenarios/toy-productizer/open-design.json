@@ -1,0 +1,124 @@
+{
+  "$schema": "https://open-design.ai/schemas/plugin.v1.json",
+  "specVersion": "1.0.0",
+  "name": "toy-productizer",
+  "title": "Toy Productizer Studio",
+  "title_i18n": {
+    "en": "Toy Productizer Studio",
+    "zh-CN": "Toy Productizer Studio"
+  },
+  "version": "0.1.0",
+  "description": "Turn toy buyer briefs, existing products, and references into non-copy creative product directions and a customer proposal artifact.",
+  "description_i18n": {
+    "en": "Turn toy buyer briefs, existing products, and references into non-copy creative product directions and a customer proposal artifact.",
+    "zh-CN": "把玩具客户需求、已有产品和参考信息转成非照抄的新品方向与客户提案 Artifact。"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Open Design"
+  },
+  "homepage": "https://github.com/nexu-io/open-design/tree/main/plugins/_official/scenarios/toy-productizer",
+  "tags": [
+    "scenario",
+    "first-party",
+    "toy",
+    "productizer",
+    "proposal",
+    "market-validation"
+  ],
+  "compat": {
+    "agentSkills": [
+      {
+        "path": "./SKILL.md"
+      }
+    ]
+  },
+  "od": {
+    "kind": "scenario",
+    "taskKind": "new-generation",
+    "scenario": "toy-productizer",
+    "mode": "live-artifact",
+    "context": {
+      "skills": [
+        {
+          "path": "./SKILL.md"
+        }
+      ],
+      "designSystem": {
+        "ref": "toy-proposal-trade-desk",
+        "path": "../../../../design-systems/toy-proposal-trade-desk/DESIGN.md",
+        "primary": true
+      }
+    },
+    "pipeline": {
+      "stages": [
+        {
+          "id": "working-context",
+          "atoms": [
+            "discovery-question-form"
+          ]
+        },
+        {
+          "id": "directions",
+          "atoms": [
+            "direction-picker"
+          ]
+        },
+        {
+          "id": "proposal",
+          "atoms": [
+            "file-write",
+            "live-artifact"
+          ]
+        },
+        {
+          "id": "feedback-handoff",
+          "atoms": [
+            "file-write"
+          ]
+        }
+      ]
+    },
+    "capabilities": [
+      "prompt:inject",
+      "fs:write"
+    ],
+    "useCase": {
+      "query": {
+        "en": "Create or revise a Toy Productizer customer proposal from a buyer brief, existing product, reference image, competitor link, market signal, or one-sentence product goal. Use the Toy Proposal Trade Desk design system.",
+        "zh-CN": "基于买家 brief、已有产品、参考图、竞品链接、市场线索或一句产品目标，生成或修改 Toy Productizer 客户提案，并使用 Toy Proposal Trade Desk 设计系统。"
+      },
+      "exampleOutputs": [
+        {
+          "path": "./examples/robot-museum-keychain/expected.zh.md",
+          "title": "Robot museum keychain proposal"
+        },
+        {
+          "path": "./examples/english-buyer-brief/expected.en.md",
+          "title": "US museum buyer proposal"
+        }
+      ]
+    },
+    "inputs": [
+      {
+        "name": "prompt",
+        "type": "text",
+        "required": true,
+        "label": "Buyer brief or productization task",
+        "placeholder": "Paste a buyer brief, describe an existing toy, or add reference constraints."
+      },
+      {
+        "name": "proposalLanguage",
+        "type": "string",
+        "required": false,
+        "label": "Proposal language",
+        "options": [
+          "auto",
+          "zh",
+          "en",
+          "bilingual"
+        ]
+      }
+    ]
+  }
+}

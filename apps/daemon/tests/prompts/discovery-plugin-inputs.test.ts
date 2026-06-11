@@ -62,4 +62,14 @@ describe('discovery.ts — Plugin inputs are authoritative for Quick brief defau
       /metadata\.kind is set or the active plugin's `od\.kind` \/ `taskKind` already names it/,
     );
   });
+
+  it('lets active plugins replace the generic Quick brief with a domain form contract', () => {
+    expect(DISCOVERY_AND_PHILOSOPHY).toContain('first-turn discovery form contract');
+    expect(DISCOVERY_AND_PHILOSOPHY).toContain(
+      'use that plugin-specific form instead of the default "Quick brief — 30 seconds" form',
+    );
+    expect(DISCOVERY_AND_PHILOSOPHY).toContain(
+      'replaces the generic output/platform/audience/tone/brand/scale questions with domain-specific questions',
+    );
+  });
 });

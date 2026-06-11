@@ -8,6 +8,11 @@
 >
 > 本文档只新增 review / roadmap 内容，不修改任何产品文档原文与代码。
 
+> 2026-06-11 implementation re-check note:
+> - `plugins/_official/scenarios/` exists in this repository. The missing path on the review baseline was specifically `plugins/_official/scenarios/toy-productizer/`, not the whole scenarios directory.
+> - `file-write` and `live-artifact` are implemented atom ids in `apps/daemon/src/plugins/atoms.ts`. Their absence as separate folders under `plugins/_official/atoms/` must not be treated as atom absence.
+> - Productizer Action Cards should remain daemon/API state, not Claude-specific `AskUserQuestion` state. Claude `stream-json` can be used as an interaction convenience, but it must not become the Productizer Core state boundary.
+
 ---
 
 ## 1. Remote Source Audit

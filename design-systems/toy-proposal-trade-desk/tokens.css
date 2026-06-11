@@ -1,0 +1,63 @@
+/* design-systems/toy-proposal-trade-desk/tokens.css
+ * Structured token bindings for Toy Proposal Trade Desk.
+ * Dense buyer-facing proposal surfaces with explicit assumption and validation boundaries.
+ */
+
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-warm: #fff7e6;
+  --fg: #15171a;
+  --fg-2: #2f3744;
+  --muted: #5b6472;
+  --meta: #2157a8;
+  --border: #d8dde6;
+  --border-soft: #e9edf3;
+  --accent: #2157a8;
+  --accent-on: #ffffff;
+  --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+  --accent-active: color-mix(in oklab, var(--accent), black 14%);
+  --success: #0f766e;
+  --warn: #9a5b00;
+  --danger: #b42318;
+  --font-display: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+  --text-4xl: 44px;
+  --leading-body: 1.5;
+  --leading-tight: 1.15;
+  --tracking-display: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --section-y-desktop: 64px;
+  --section-y-tablet: 48px;
+  --section-y-phone: 32px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 9999px;
+  --elev-flat: none;
+  --elev-ring: 0 0 0 1px var(--border);
+  --elev-raised: 0 12px 32px rgba(21, 23, 26, 0.08);
+  --focus-ring: 0 0 0 4px rgba(33, 87, 168, 0.22);
+  --motion-fast: 140ms;
+  --motion-base: 220ms;
+  --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
+  --container-max: 1120px;
+  --container-gutter-desktop: 32px;
+  --container-gutter-tablet: 24px;
+  --container-gutter-phone: 16px;
+}
