@@ -15,7 +15,7 @@
 - Phase A/B/C/D are complete on `productizer/toy-productizer-studio`.
 - Current technical evidence is in `docs/toy-productizer/PHASE1_REVIEW.md`.
 - Phase C passed with the `gemini` adapter; `claude` is intentionally excluded from current acceptance.
-- Human acceptance of the generated proposal artifact is pending and must be recorded before treating the output as finally accepted.
+- Human acceptance of the generated proposal artifact failed on 2026-06-11 because the output was too generic and did not clearly beat a general-purpose model proposal. Treat Phase C as pipeline proof only, not product-value proof.
 - Phase F production UI remains blocked until Phase E HTTP + CLI parity exists.
 
 ## Important Dual-Track Constraint
@@ -38,6 +38,8 @@ This applies at minimum to:
 - handoff/export readiness;
 - any UI flow that changes what a customer or buyer sees;
 - any future phase claiming Productizer Core or vertical workspace completion.
+
+The next proposal-output acceptance must prove vertical depth, not just artifact generation. It should show buyer/channel reasoning, SKU and packaging tradeoffs, unconfirmed commercial assumptions, feedback-ready questions, and clear Productizer value beyond a generic model-generated proposal.
 
 ## File Map
 

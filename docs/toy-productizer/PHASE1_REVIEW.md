@@ -248,6 +248,17 @@ Then verify the browser path manually or with Playwright.
 
 Do not expand scope. Phase 1 is `TECHNICAL PASS` for plugin/design-system/agent-artifact launch-path proof.
 
-Human acceptance status: `PENDING_USER_ACCEPTANCE`. The generated proposal artifact is ready for the coordinator/user to inspect, but final product/output acceptance must be recorded by the human reviewer, not inferred from agent-run evidence alone.
+Human acceptance status: `USER_REJECTED`.
+
+Human review result on 2026-06-11: the generated proposal is too simple and does not yet show a meaningful Productizer advantage over asking a general-purpose model such as Doubao to output a proposal. The current artifact proves the generation pipeline, but it does not prove product value.
+
+Reasons:
+
+- The proposal reads like a generic concept brief rather than a vertical toy-trade productization artifact.
+- It lacks enough buyer-facing commercial depth: target buyer objections, SKU rationale, margin/price logic, display constraints, packaging tradeoffs, and decision options are shallow.
+- It does not expose the durable Productizer advantages yet: versioned facts, feedback credibility, readiness gates, action cards, and reusable business state.
+- It does not create a strong enough "why not ChatGPT/Doubao + template" distinction for a user.
+
+Revised acceptance rule: Phase 1 remains `TECHNICAL PASS` for pipeline proof, but product/output acceptance is `FAIL` until a regenerated proposal demonstrates clear vertical depth and Productizer-specific value beyond generic model copy.
 
 The next useful step is a small verticalized UI entry/workspace pass, not CRM, RFQ, supplier outreach, marketplace, legal clearance, or generic toy-design expansion.
