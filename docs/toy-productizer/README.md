@@ -3,6 +3,8 @@
 This folder is a product-definition snapshot copied from `/Users/chenshangwei/code/toyDesignAgent`.
 
 Use `BRANCH_BRIEF.md` for the Open Design adaptation scope.
+Use `AGENT_WORK_SPLIT.md` for the Architect Agent, Antigravity, and Codex handoff prompts.
+Use `NEXT_TASKS_PLAN.md` for the executable Phase A-F plan.
 Use `product/TOY_MARKET_PRODUCTIZER_MRD.md` and `product/TOY_MARKET_PRODUCTIZER_PRD.md` for product source of truth.
 Use `product/TOY_PRODUCTIZER_INTERACTION_SPEC.md` for the first-run and chat/artifact interaction model.
 Use `product/TOY_COMMERCIALIZATION_PACK_SPEC.md` and `product/TOY_MARKET_VALIDATION_PLAYBOOK.md` for business objects, feedback, and handoff boundaries.
