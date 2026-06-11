@@ -1,6 +1,7 @@
 # Toy Productizer Studio Phase 1 Review
 
 > Review date: 2026-06-09
+> Acceptance update: 2026-06-11
 > Review posture: HOLD SCOPE
 > Skills used: `gstack-plan-ceo-review`, `gstack-plan-eng-review`, `superpowers:writing-plans`
 
@@ -29,7 +30,7 @@ Toy Productizer owns business state, feedback credibility, readiness, and human 
 
 ## Engineering Review
 
-Verdict: PARTIAL. The file-level Phase 1 content, dependency-backed checks, and daemon-backed project-create path now pass. Full acceptance still needs one selected agent adapter to generate and persist a proposal artifact.
+Verdict: PASS with adapter notes. The file-level Phase 1 content, dependency-backed checks, daemon-backed project-create path, and one real agent-backed proposal artifact path now pass.
 
 Current implementation covers:
 
@@ -47,6 +48,7 @@ Review fixes already applied:
 - Replaced the manifest `feedback-handoff` pipeline atom from planned `handoff` to implemented `file-write`, so Phase 1 does not depend on a reserved atom.
 - Added `prompt` and `expected_output` fields to `evals/evals.json` while preserving file-based fixtures, matching the documented plugin eval shape more closely.
 - Added `od.context.skills[{ path: "./SKILL.md" }]` to the plugin manifest. `compat.agentSkills` keeps the package portable, but daemon prompt composition reads plugin-local skill instructions through `od.context.skills`, so both declarations are needed for this Phase 1 plugin.
+- Tightened the customer-visible forbidden-claim boundary after runtime output exposed an unsafe `IP Unique` line. The plugin instructions, eval fixture forbidden terms, daemon contract test, and repeatable scan command now cover capitalization variants and `copyright conflicts` wording.
 
 ## Runtime Validation Completed
 
@@ -72,44 +74,66 @@ Results:
 - `@open-design/daemon` build passed.
 - plugin validation passed with `ok=true`.
 
-### Gap 1: Full agent artifact output is not yet proven
+## Agent Artifact Acceptance Evidence
 
-The daemon-backed project-create path is proven, but a real agent run was not started in this pass to avoid selecting an adapter or spending provider budget without an explicit acceptance target.
+Verdict: PASS for Phase 1 launch-path proof using the locally available `gemini` adapter. `claude` is intentionally excluded from the current acceptance scope.
 
-Current smoke shape:
+Runtime target:
+
+- Branch: `productizer/toy-productizer-studio`
+- Local daemon: `http://127.0.0.1:17456`
+- Local web: `http://127.0.0.1:17573`
+- Project id: `8314e195-2745-4132-b792-184fcf68fdb2`
+- Conversation id: `02f289fa-f5d7-4159-b84a-f41969d2815b`
+- Design system: `toy-proposal-trade-desk`
+- Plugin: `toy-productizer`
+
+Agent runs:
+
+- `codex`: attempted run `4f6ac6c1-ccd3-4230-b5f0-2a3fb33e5687`; blocked by local Codex CLI config, `service_tier` value `default` is invalid for this installed CLI (`fast` or `flex` expected). This is an adapter/config issue, not a Toy Productizer plugin failure.
+- `gemini`: discovery run `523b2d06-e051-4db3-9742-472f64bcb8ef`; succeeded and emitted the Toy-specific discovery form.
+- `gemini`: artifact run `6e7ad41e-eecb-4b4f-b157-28f0fb6845a1`; succeeded and generated `index.html`, `index.html.artifact.json`, and `WORKING_CONTEXT.md`.
+- `gemini`: patch run `699cc8b3-659e-4cbf-8268-4401a564f50e`; succeeded and replaced the unsafe `IP Unique` customer-visible claim with validation-only `Reference Differentiation` wording.
+
+Generated files:
+
+- `.od/projects/8314e195-2745-4132-b792-184fcf68fdb2/index.html`
+- `.od/projects/8314e195-2745-4132-b792-184fcf68fdb2/index.html.artifact.json`
+- `.od/projects/8314e195-2745-4132-b792-184fcf68fdb2/WORKING_CONTEXT.md`
+
+Final customer-visible artifact checks:
 
 ```bash
-PID=$(node apps/daemon/bin/od.mjs project create \
-  --daemon-url http://127.0.0.1:17456 \
-  --name "Toy Productizer QA" \
-  --plugin toy-productizer \
-  --design-system toy-proposal-trade-desk \
-  --inputs '{"prompt":"我们有一款普通机器人钥匙扣，老客户发来一张复古航天机器人参考图，想做博物馆礼品店可卖的新品，零售价 15 美元以内，但不要太像原图。不要毛绒。","proposalLanguage":"auto"}' \
-  --json | jq -r '.project.id // .projectId')
+rg -ni "production-ready|quotation-ready|sample-ready|legally cleared|IP safe|IP-safe|IP unique|copyright-safe|copyright cleared|copyright conflicts|character-copyright conflicts|正式报价|可直接量产|无侵权|可打样|可生产" .od/projects/8314e195-2745-4132-b792-184fcf68fdb2/index.html .od/artifacts
 ```
 
-Next acceptance command:
+Result: no output.
 
 ```bash
-node apps/daemon/bin/od.mjs run start \
-  --daemon-url http://127.0.0.1:17456 \
-  --project "$PID" \
-  --plugin toy-productizer \
-  --inputs '{"prompt":"我们有一款普通机器人钥匙扣，老客户发来一张复古航天机器人参考图，想做博物馆礼品店可卖的新品，零售价 15 美元以内，但不要太像原图。不要毛绒。","proposalLanguage":"auto"}' \
-  --agent codex \
-  --follow
+rg -ni "plush|毛绒" .od/projects/8314e195-2745-4132-b792-184fcf68fdb2/index.html .od/artifacts
 ```
 
-If `codex` is unavailable, use the locally available Open Design agent adapter and record the exact adapter used.
+Result: one expected customer constraint line, `No Plush. No direct copy of reference silhouettes.`
 
-### Gap 2: UI entry should remain deferred until agent artifact smoke passes
+```bash
+rg -n "Reference Differentiation|Validation-Only Boundary|AI draft|market validation|v2.0-DRAFT|<h2>" .od/projects/8314e195-2745-4132-b792-184fcf68fdb2/index.html
+```
 
-Do not add a Studio navigation or routing change before a daemon-backed agent run proves that:
+Result: confirms `v2.0-DRAFT`, all 10 proposal sections, `Reference Differentiation`, and validation-only boundary.
 
-- `toy-productizer` applies cleanly.
-- `toy-proposal-trade-desk` resolves as the active design system.
-- the generated artifact preserves no-plush and validation-only constraints.
-- the fixture outputs avoid forbidden customer-visible claims.
+Artifact manifest:
+
+- `kind`: `html`
+- `renderer`: `html`
+- `status`: `complete`
+- `exports`: `html`, `pdf`, `zip`
+
+Important runtime notes:
+
+- Default shell Node was `v23.7.0`; all validation used `PATH="/opt/homebrew/opt/node@24/bin:$PATH"` to satisfy the repo Node `~24` requirement.
+- Sandbox restrictions required escalated execution for `pnpm guard`, `pnpm tools-dev run web`, and localhost daemon CLI calls.
+- The earlier plan command `od project show` is stale for this repo shape; the working command is `od project info`.
+- The earlier plan command `od agent list` is stale; available agents were verified through `/api/agents`.
 
 ## Revised Phase 1 Plan
 
@@ -174,6 +198,8 @@ Expected:
 
 ### Task 4: Prove the Toy Productizer Studio launch path
 
+Status: PASS using the `gemini` adapter.
+
 Prerequisites:
 
 - local daemon running
@@ -201,7 +227,7 @@ Expected:
 
 ### Task 5: Only then consider a small UI entry
 
-Do this only after Tasks 1-4 pass.
+Tasks 1-4 now pass. The next implementation step may add a small UI entry, but should stay narrowly scoped.
 
 Allowed UI scope:
 
@@ -220,10 +246,6 @@ Then verify the browser path manually or with Playwright.
 
 ## Decision
 
-Do not expand scope. The next useful step is an agent-backed artifact run, not more product surface.
+Do not expand scope. Phase 1 can now be treated as accepted for plugin/design-system/agent-artifact launch-path proof.
 
-Phase 1 can be called complete only when:
-
-- the already-passing dependency and daemon smoke checks stay green,
-- an `od run start --project <id> --plugin toy-productizer` run generates proposal artifact files,
-- fixture checks and generated content prove hard constraints and forbidden-claim boundaries hold.
+The next useful step is a small verticalized UI entry/workspace pass, not CRM, RFQ, supplier outreach, marketplace, legal clearance, or generic toy-design expansion.

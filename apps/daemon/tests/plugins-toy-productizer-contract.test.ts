@@ -76,4 +76,32 @@ describe('Toy Productizer bundled scenario prompt contract', () => {
       '提案语言',
     ]);
   });
+
+  it('forbids customer-visible IP and production readiness claims', async () => {
+    const body = await readFile(toySkillPath, 'utf8');
+
+    for (const claim of [
+      'supplier-ready',
+      'quotation-ready',
+      'production-ready',
+      'infringement-safe',
+      'IP safe',
+      'IP-safe',
+      'IP unique',
+      'IP Unique',
+      'copyright-safe',
+      'copyright cleared',
+      'copyright conflicts',
+      'character-copyright conflicts',
+      'avoids copyright conflicts',
+      '无侵权',
+      '可直接量产',
+      '正式报价',
+    ]) {
+      expect(body).toContain(claim);
+    }
+
+    expect(body).toContain('similarity risk screen only, not legal clearance');
+    expect(body).toContain('Treat these terms as forbidden in any capitalization.');
+  });
 });

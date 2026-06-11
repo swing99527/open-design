@@ -471,7 +471,7 @@ Expected: generated proposal content includes the required proposal structure an
 Run:
 
 ```bash
-rg -n "production-ready|quotation-ready|sample-ready|legally cleared|IP safe|正式报价|可直接量产|无侵权|可打样|可生产" .od/projects "$PWD/.od/artifacts"
+rg -ni "production-ready|quotation-ready|sample-ready|legally cleared|IP safe|IP-safe|IP unique|copyright-safe|copyright cleared|copyright conflicts|character-copyright conflicts|正式报价|可直接量产|无侵权|可打样|可生产" .od/projects "$PWD/.od/artifacts"
 ```
 
 Expected: no output in generated customer proposal files. If any match appears only in internal instructions or docs, record the path and confirm it is not customer-visible.

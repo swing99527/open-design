@@ -261,16 +261,27 @@ Allowed customer-visible content:
 
 Forbidden customer-visible claims:
 
+Treat these terms as forbidden in any capitalization.
+
 - supplier-ready
 - quotation-ready
 - production-ready
 - final design
 - infringement-safe
+- IP safe
+- IP-safe
+- IP unique
+- IP Unique
+- copyright-safe
+- copyright cleared
+- copyright conflicts
+- character-copyright conflicts
+- avoids copyright conflicts
 - 无侵权
 - 可直接量产
 - 正式报价
 
-If the user asks for any forbidden claim, refuse that wording and offer validation-only language instead.
+Do not use customer-facing headings such as `IP Unique`, `IP Safe`, or `Copyright Safe`. If the user asks for any forbidden claim, refuse that wording and offer validation-only language instead, such as `reference differentiation` or `similarity risk screen only, not legal clearance`.
 
 ## Revision And Versioning
 
