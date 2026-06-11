@@ -330,3 +330,7 @@ Blocked until Phase C PASS:
 - **Task E2** (SQLite tables, routes, guards) and **Task E3** (CLI subcommands).
 
 Single next action for the coordinator: have the implementation agent execute Phase C (Tasks C1–C4 in `NEXT_TASKS_PLAN.md`) and record the evidence block in `PHASE1_REVIEW.md`; then Phase E proceeds against this document without further architecture review.
+
+---
+
+> Post-V0 extension rulings (3D/video assets, external data sources, community surface, registry distribution) are recorded separately in `EXTENSION_DECISIONS.md`. They do not modify any scope, schema, or gate decision in this document.
