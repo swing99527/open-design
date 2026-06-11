@@ -78,6 +78,13 @@ describe('DISCOVERY_AND_PHILOSOPHY (contracts copy) — prompt routing parity', 
       'If this turn only edited an existing HTML file',
     );
   });
+
+  it('allows plugin-specific first-turn discovery forms to replace the generic Quick brief', () => {
+    expect(DISCOVERY_AND_PHILOSOPHY).toContain('first-turn discovery form contract');
+    expect(DISCOVERY_AND_PHILOSOPHY).toContain(
+      'use that plugin-specific form instead of the default "Quick brief — 30 seconds" form',
+    );
+  });
 });
 
 describe('composeSystemPrompt', () => {

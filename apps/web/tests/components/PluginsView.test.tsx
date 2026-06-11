@@ -268,6 +268,64 @@ describe('PluginsView', () => {
     expect(mockedInstallPluginSource).not.toHaveBeenCalled();
   });
 
+  it('opens Available when only bundled workflows exist and prioritizes custom ready scenarios', async () => {
+    const defaultWorkflow = makePlugin(
+      'od-default',
+      'bundled',
+      'bundled',
+      'Default design router',
+    );
+    const toyWorkflow = makePlugin(
+      'toy-productizer',
+      'bundled',
+      'bundled',
+      'Toy Productizer Studio',
+      'Turns buyer briefs into proposal artifacts.',
+    );
+    mockedListPlugins.mockResolvedValue([defaultWorkflow, toyWorkflow]);
+    mockedListMarketplaces.mockResolvedValue([
+      {
+        id: 'official',
+        url: 'https://open-design.ai/marketplace/open-design-marketplace.json',
+        trust: 'official',
+        manifest: {
+          name: 'Open Design Official',
+          version: '1.0.0',
+          plugins: [
+            {
+              name: 'open-design/od-default',
+              title: 'Default design router',
+              source: 'github:nexu-io/open-design@main/plugins/_official/scenarios/od-default',
+              version: '1.0.0',
+              description: 'Default Open Design workflow.',
+              tags: ['scenario', 'first-party'],
+            },
+            {
+              name: 'open-design/toy-productizer',
+              title: 'Toy Productizer Studio',
+              source: 'github:nexu-io/open-design@main/plugins/_official/scenarios/toy-productizer',
+              version: '1.0.0',
+              description: 'Turns buyer briefs into proposal artifacts.',
+              tags: ['scenario', 'first-party', 'toy'],
+            },
+          ],
+        },
+      },
+    ]);
+
+    render(<PluginsView />);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('plugins-tab-available').getAttribute('aria-selected')).toBe('true'),
+    );
+    expect(await screen.findByText('Toy Productizer Studio')).toBeTruthy();
+    expect(screen.getByTestId('plugins-available-install-open-design/toy-productizer').textContent)
+      .toBe('Use');
+
+    const cards = document.querySelectorAll('.plugins-view__available-card');
+    expect(cards[0]?.textContent).toContain('Toy Productizer Studio');
+  });
+
   it('installs restricted catalog entries that collide with bundled official plugin names', async () => {
     const onUsePlugin = vi.fn();
     mockedListMarketplaces.mockResolvedValue([

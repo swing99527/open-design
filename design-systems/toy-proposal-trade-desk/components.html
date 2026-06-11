@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Toy Proposal Trade Desk - reference components</title>
+    <meta name="description" content="Reference fixture for Toy Productizer Studio proposal artifacts." />
+    <style>
+      :root {
+        --bg: #f7f8fa;
+        --surface: #ffffff;
+        --surface-warm: #fff7e6;
+        --fg: #15171a;
+        --fg-2: #2f3744;
+        --muted: #5b6472;
+        --meta: #2157a8;
+        --border: #d8dde6;
+        --border-soft: #e9edf3;
+        --accent: #2157a8;
+        --accent-on: #ffffff;
+        --accent-hover: color-mix(in oklab, var(--accent), black 8%);
+        --accent-active: color-mix(in oklab, var(--accent), black 14%);
+        --success: #0f766e;
+        --warn: #9a5b00;
+        --danger: #b42318;
+        --font-display: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        --font-body: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+        --text-xs: 12px;
+        --text-sm: 14px;
+        --text-base: 16px;
+        --text-lg: 18px;
+        --text-xl: 22px;
+        --text-2xl: 28px;
+        --text-3xl: 36px;
+        --text-4xl: 44px;
+        --leading-body: 1.5;
+        --leading-tight: 1.15;
+        --tracking-display: 0;
+        --space-1: 4px;
+        --space-2: 8px;
+        --space-3: 12px;
+        --space-4: 16px;
+        --space-5: 20px;
+        --space-6: 24px;
+        --space-8: 32px;
+        --space-12: 48px;
+        --section-y-desktop: 64px;
+        --section-y-tablet: 48px;
+        --section-y-phone: 32px;
+        --radius-sm: 4px;
+        --radius-md: 6px;
+        --radius-lg: 8px;
+        --radius-pill: 9999px;
+        --elev-flat: none;
+        --elev-ring: 0 0 0 1px var(--border);
+        --elev-raised: 0 12px 32px rgba(21, 23, 26, 0.08);
+        --focus-ring: 0 0 0 4px rgba(33, 87, 168, 0.22);
+        --motion-fast: 140ms;
+        --motion-base: 220ms;
+        --ease-standard: cubic-bezier(0.23, 1, 0.32, 1);
+        --container-max: 1120px;
+        --container-gutter-desktop: 32px;
+        --container-gutter-tablet: 24px;
+        --container-gutter-phone: 16px;
+      }
+
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; padding: 0; }
+      body {
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-body);
+        font-size: var(--text-base);
+        line-height: var(--leading-body);
+        -webkit-font-smoothing: antialiased;
+      }
+      a { color: var(--accent); text-decoration: none; }
+      a:hover { color: var(--accent-hover); text-decoration: underline; }
+      h1, h2, h3, p { margin: 0; }
+      h1, h2, h3 {
+        font-family: var(--font-display);
+        letter-spacing: var(--tracking-display);
+        line-height: var(--leading-tight);
+      }
+      h1 { font-size: var(--text-4xl); font-weight: 760; }
+      h2 { font-size: var(--text-3xl); font-weight: 720; }
+      h3 { font-size: var(--text-xl); font-weight: 700; }
+      kbd {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 1px var(--space-1);
+        background: var(--surface);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+      }
+      section { padding-block: var(--section-y-desktop); }
+      .container {
+        max-width: var(--container-max);
+        margin-inline: auto;
+        padding-inline: var(--container-gutter-desktop);
+      }
+      .stack-3 > * + * { margin-block-start: var(--space-3); }
+      .stack-4 > * + * { margin-block-start: var(--space-4); }
+      .stack-6 > * + * { margin-block-start: var(--space-6); }
+      .row-between {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-4);
+      }
+      .eyebrow {
+        color: var(--meta);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+      .lead { color: var(--fg-2); font-size: var(--text-lg); max-width: 680px; }
+      .body-muted { color: var(--muted); }
+      .body-sm { font-size: var(--text-sm); }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        box-shadow: var(--elev-flat);
+        padding: var(--space-5);
+      }
+      .proposal-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+        gap: var(--space-6);
+        align-items: start;
+      }
+      .comparison {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: var(--text-sm);
+      }
+      .comparison th,
+      .comparison td {
+        border-bottom: 1px solid var(--border-soft);
+        padding: var(--space-3);
+        text-align: left;
+        vertical-align: top;
+      }
+      .comparison th { color: var(--fg-2); font-weight: 700; }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid color-mix(in oklab, var(--warn), transparent 70%);
+        border-radius: var(--radius-sm);
+        background: var(--surface-warm);
+        color: var(--warn);
+        font: 700 var(--text-xs) / 1 var(--font-body);
+        padding: 3px var(--space-2);
+      }
+      .boundary {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background: var(--border-soft);
+        color: var(--muted);
+        padding: var(--space-4);
+      }
+      .icon {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border-radius: var(--radius-pill);
+        background: var(--success);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        min-height: 40px;
+        border: 1px solid transparent;
+        border-radius: var(--radius-md);
+        padding: 0 var(--space-4);
+        font: 700 var(--text-sm) / 1 var(--font-body);
+        cursor: pointer;
+        transition:
+          background-color var(--motion-fast) var(--ease-standard),
+          border-color var(--motion-fast) var(--ease-standard),
+          color var(--motion-fast) var(--ease-standard);
+      }
+      .btn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+      .btn-primary { background: var(--accent); color: var(--accent-on); }
+      .btn-primary:hover { background: var(--accent-hover); }
+      .btn-secondary {
+        background: var(--surface);
+        border-color: var(--border);
+        color: var(--fg);
+        box-shadow: var(--elev-ring);
+      }
+      .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+      .field { display: grid; gap: var(--space-2); }
+      label { color: var(--fg-2); font-size: var(--text-sm); font-weight: 700; }
+      input {
+        width: 100%;
+        min-height: 42px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        color: var(--fg);
+        font: inherit;
+        padding: 0 var(--space-3);
+      }
+      input:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
+      @media (max-width: 860px) {
+        section { padding-block: var(--section-y-tablet); }
+        .container { padding-inline: var(--container-gutter-tablet); }
+        .proposal-grid { grid-template-columns: 1fr; }
+        .row-between { align-items: flex-start; flex-direction: column; }
+      }
+      @media (max-width: 560px) {
+        section { padding-block: var(--section-y-phone); }
+        .container { padding-inline: var(--container-gutter-phone); }
+        h1 { font-size: var(--text-3xl); }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <div class="container stack-6">
+          <div class="row-between">
+            <div class="stack-3">
+              <p class="eyebrow">Toy Productizer Studio</p>
+              <h1>Robot museum gift proposal</h1>
+              <p class="lead">A buyer-facing proposal surface for comparing non-copy product directions, assumptions, and feedback questions.</p>
+            </div>
+            <div class="row-between" aria-label="Proposal actions">
+              <button class="btn btn-primary" type="button"><span class="icon"></span> Select direction</button>
+              <button class="btn btn-secondary" type="button">Export</button>
+            </div>
+          </div>
+
+          <div class="proposal-grid">
+            <article class="card stack-4">
+              <div class="row-between">
+                <h2>Creative direction comparison</h2>
+                <span class="badge">Unconfirmed retail target</span>
+              </div>
+              <table class="comparison">
+                <thead>
+                  <tr>
+                    <th>Direction</th>
+                    <th>Buyer fit</th>
+                    <th>Risk</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Mini rover keychain</td>
+                    <td>Museum checkout counter</td>
+                    <td>Keep silhouette away from reference</td>
+                  </tr>
+                  <tr>
+                    <td>Desk-size explorer figurine</td>
+                    <td>Educational display shelf</td>
+                    <td>Requires human sample review</td>
+                  </tr>
+                </tbody>
+              </table>
+            </article>
+
+            <aside class="stack-4">
+              <article class="card stack-3">
+                <h3>Feedback questions</h3>
+                <p class="body-sm body-muted">Does the buyer prefer keychain, figurine, or a small lineup? Which channel constraint matters most?</p>
+                <p class="body-sm">Use <kbd>Review</kbd> before any sample, quote, listing, or production step.</p>
+              </article>
+              <article class="boundary body-sm">
+                AI draft. For market validation only. Requires human review before sample, quotation, public listing, or production. Similarity risk screen only, not legal clearance.
+              </article>
+              <div class="field">
+                <label for="note">Version note</label>
+                <input id="note" value="Changed sections: recommendation, CMF, feedback questions" />
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
