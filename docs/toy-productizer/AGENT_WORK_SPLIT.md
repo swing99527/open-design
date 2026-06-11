@@ -29,6 +29,7 @@ Do not rename the product to Toy Design. Do not expand V0 into CRM, RFQ, supplie
 - Do not rewrite another agent's branch.
 - Do not touch another agent's owned files unless the coordinator explicitly asks.
 - Every agent must return: branch name, commit ids, changed files, commands run, PASS / PARTIAL / FAIL result, and blockers.
+- Critical product validation and customer-visible output validation require explicit human acceptance by the coordinator/user. Agents may report `TECHNICAL PASS` with evidence, but must not mark the product/output as finally accepted without that human sign-off.
 - Runtime artifacts under `.od/`, `.tmp/`, Playwright reports, screenshots, videos, and local logs must not be committed unless explicitly requested and placed under docs as reviewed evidence.
 - Destructive shell commands require explicit human approval.
 

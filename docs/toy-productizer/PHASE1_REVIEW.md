@@ -246,6 +246,8 @@ Then verify the browser path manually or with Playwright.
 
 ## Decision
 
-Do not expand scope. Phase 1 can now be treated as accepted for plugin/design-system/agent-artifact launch-path proof.
+Do not expand scope. Phase 1 is `TECHNICAL PASS` for plugin/design-system/agent-artifact launch-path proof.
+
+Human acceptance status: `PENDING_USER_ACCEPTANCE`. The generated proposal artifact is ready for the coordinator/user to inspect, but final product/output acceptance must be recorded by the human reviewer, not inferred from agent-run evidence alone.
 
 The next useful step is a small verticalized UI entry/workspace pass, not CRM, RFQ, supplier outreach, marketplace, legal clearance, or generic toy-design expansion.

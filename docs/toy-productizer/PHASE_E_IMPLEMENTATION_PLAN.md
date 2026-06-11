@@ -13,8 +13,9 @@
 ## Current Gate Status
 
 - Phase A/B/C/D are complete on `productizer/toy-productizer-studio`.
-- Current accepted evidence is in `docs/toy-productizer/PHASE1_REVIEW.md`.
+- Current technical evidence is in `docs/toy-productizer/PHASE1_REVIEW.md`.
 - Phase C passed with the `gemini` adapter; `claude` is intentionally excluded from current acceptance.
+- Human acceptance of the generated proposal artifact is pending and must be recorded before treating the output as finally accepted.
 - Phase F production UI remains blocked until Phase E HTTP + CLI parity exists.
 
 ## Important Dual-Track Constraint
@@ -25,6 +26,18 @@
 - an explicit PR explanation that a specific route is internal-only and not user-facing.
 
 For this branch, treat E1/E2/E3 as implementation checkpoints. Do not call the work merge-ready until the dual-track checklist is satisfied.
+
+## Human Acceptance Gate
+
+For critical product validation and customer-visible output validation, agents must stop at `TECHNICAL PASS` and provide evidence for human review. Only the coordinator/user can mark these items as finally accepted.
+
+This applies at minimum to:
+
+- generated proposal artifacts;
+- forbidden-claim/no-plush/non-copy output checks;
+- handoff/export readiness;
+- any UI flow that changes what a customer or buyer sees;
+- any future phase claiming Productizer Core or vertical workspace completion.
 
 ## File Map
 
