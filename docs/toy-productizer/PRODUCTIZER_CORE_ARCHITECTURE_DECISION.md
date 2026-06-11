@@ -1,7 +1,7 @@
 # Productizer Core Architecture Decision
 
 > Product: **Toy Productizer Studio**
-> Branch: `swing99527/open-design` @ `productizer/toy-productizer-studio` (HEAD `3c29ce7e` at review time)
+> Branch: `swing99527/open-design` @ `productizer/toy-productizer-studio` (initial review HEAD `3c29ce7e`; Phase C refreshed at `d38bb90b`)
 > Author role: Total System Architect (Lane 1, per `docs/toy-productizer/AGENT_WORK_SPLIT.md`)
 > Status: **DECISION — binding for Phase E implementation unless superseded by a newer decision doc**
 >
@@ -45,10 +45,11 @@ All statements in this section are **[SOURCE]**, verified on this branch.
 2. **[SOURCE]** `file-write` and `live-artifact` are implemented atom ids in `apps/daemon/src/plugins/atoms.ts`. The earlier review inferred absence from missing folders under `plugins/_official/atoms/`; the atom catalog is code, not folders. The "Phase 1 atom gap" risk is **closed**.
 3. **[DECISION]** Productizer Action Cards are daemon/API state, not Claude-specific `AskUserQuestion` state (see §3.7 and §6). The earlier review's suggestion to reuse the `tool-result` mechanism is downgraded to an optional interaction convenience.
 
-### 1.3 What is still unproven
+### 1.3 What is now proven
 
-- **[SOURCE]** `docs/toy-productizer/PHASE1_REVIEW.md` records PARTIAL: `pnpm guard`, plugin-runtime typecheck, daemon build, plugin validation (`ok=true`), and the daemon-backed project-create path all pass — but **no real agent run has produced a proposal artifact yet** (Phase C of `NEXT_TASKS_PLAN.md` is pending).
-- This is the single gate condition for the verdict in §9.
+- **[SOURCE]** `docs/toy-productizer/PHASE1_REVIEW.md` now records `PASS with adapter notes`: `pnpm guard`, plugin-runtime typecheck, daemon build, plugin validation (`ok=true`), daemon-backed project-create, and a real `gemini` agent run all pass.
+- The `gemini` run generated `index.html`, `index.html.artifact.json`, and `WORKING_CONTEXT.md`; a follow-up `gemini` patch run replaced the unsafe customer-visible `IP Unique` wording with validation-only `Reference Differentiation`.
+- Phase C is no longer a Productizer Core blocker. Phase E may start. Phase F production UI remains gated on Phase E HTTP + CLI parity.
 
 ---
 
@@ -292,7 +293,7 @@ packages/contracts/tests/productizer-contract.test.ts  # no industry terms in co
 
 | # | Risk | Mitigation |
 |---|---|---|
-| R1 | **Phase C still unproven** — no real agent run has produced a proposal artifact (**[SOURCE]** `PHASE1_REVIEW.md` PARTIAL). If generation quality or pipeline wiring fails, Core tables would record state for a product that doesn't work. | Phase E daemon/route work starts only after Phase C PASS (§9). Contracts-only work (E1) carries no such risk. |
+| R1 | **Phase E overreach after Phase C PASS** — now that real artifact generation works, the risk shifts to building too much Core surface too early. | Keep Phase E to contracts, SQLite, routes, guards, CLI parity, and tests only. No Phase F production UI, CRM, RFQ, supplier outreach, quotation, sampling, legal/IP clearance, marketplace flows, or generation routes. |
 | R2 | Version hollowing — `artifactRef` pointing at a live path | Immutability is a named test case (§6.5) |
 | R3 | Toy leakage into Core | Contract test greps type keys; review gate greps `apps/daemon/src/productizer/*.ts` (excluding `domains/`) for industry terms |
 | R4 | Chat/messages parsed as fact source | Routes are the only write path; review checklist item; web reads only `/api/productizer/*` |
@@ -316,20 +317,22 @@ Phase E is complete when all of the following hold:
 
 ## 9. Verdict: Readiness to Start Phase E
 
-**PARTIAL.**
+**PASS.**
 
 - **Architecture readiness: PASS.** The object model, storage ownership, domain contract, route/CLI plan, and guard set above are fully specified, consistent with verified source structures (`db.ts` modular migrations, contracts barrel, pure `apply.ts`, implemented atom catalog), and contain no open design questions blocking implementation.
-- **Process gate: NOT YET MET.** Per `AGENT_WORK_SPLIT.md` ("Phase E starts only after Codex returns Phase C PASS") and **[SOURCE]** `PHASE1_REVIEW.md`, the real agent artifact run (Phase C of `NEXT_TASKS_PLAN.md`) is still pending. Until one `od run start` with the `toy-productizer` plugin produces a proposal artifact that passes the required-section, no-plush, non-copy, and forbidden-claims checks, daemon tables and routes must not land.
+- **Process gate: MET.** `PHASE1_REVIEW.md` records Phase C PASS using the locally available `gemini` adapter, including generated proposal artifact files and forbidden-claims/no-plush/validation-boundary checks.
 
-Permitted to start immediately (no gate dependency, no runtime risk):
+Permitted to start immediately:
 
-- **Task E1 (contracts only)**: `packages/contracts/src/productizer/types.ts`, `api.ts`, barrel exports, and the contract test. Pure types; reversible; unblocks daemon work the moment Phase C passes.
+- **Task E1 (contracts)**: `packages/contracts/src/productizer/types.ts`, `api.ts`, barrel exports, and the contract test.
+- **Task E2 (SQLite tables, routes, guards)**: Productizer persistence, daemon routes, version snapshot guard, forbidden-claims guard, feedback credibility guard, and audit append path.
+- **Task E3 (CLI parity)**: `od productizer` subcommands registered through `SUBCOMMAND_MAP` with `--json` output.
 
-Blocked until Phase C PASS:
+Still blocked:
 
-- **Task E2** (SQLite tables, routes, guards) and **Task E3** (CLI subcommands).
+- **Phase F production UI.** UI may only start after Phase E route + CLI parity is implemented and tested. Docs-only and isolated mock component planning remain allowed, but no route/import wiring should land before Phase E.
 
-Single next action for the coordinator: have the implementation agent execute Phase C (Tasks C1–C4 in `NEXT_TASKS_PLAN.md`) and record the evidence block in `PHASE1_REVIEW.md`; then Phase E proceeds against this document without further architecture review.
+Single next action for the coordinator: assign the implementation agent to Phase E against this decision doc and `docs/toy-productizer/PHASE_E_IMPLEMENTATION_PLAN.md`.
 
 ---
 
