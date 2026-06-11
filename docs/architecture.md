@@ -4,6 +4,10 @@
 
 This doc describes the system topology, runtime modes, data flow, and file layout. Design rationale lives in [`spec.md`](spec.md); protocol details for skills and agent adapters live in their own docs.
 
+For a source-verified view of the current implementation, end-to-end business
+flow, and secondary development playbook, see
+[`current-architecture-and-secondary-development.md`](current-architecture-and-secondary-development.md).
+
 [ocod]: https://github.com/OpenCoworkAI/open-codesign
 [acd]: https://github.com/VoltAgent/awesome-claude-design
 [piai]: https://github.com/badlogic/pi-mono/tree/main/packages/ai

@@ -1,0 +1,17 @@
+{
+  "skill_name": "toy-productizer",
+  "positive": [
+    "We have an existing robot keychain and a buyer reference. Create 3 non-copy product directions and a customer proposal.",
+    "客户发来参考图，想把现有玩具改成适合博物馆礼品店的新款提案。",
+    "Make a Toy Productizer proposal for a US museum buyer under a $15 retail price.",
+    "不要毛绒，改成机器人手办，并更新客户提案。",
+    "Record this buyer feedback: they like direction B but only said interesting."
+  ],
+  "negative": [
+    "Generate a cute toy image.",
+    "Create a CRM dashboard for toy factory sales.",
+    "Send RFQs to suppliers.",
+    "Make a formal quotation sheet.",
+    "Publish this product to a marketplace."
+  ]
+}

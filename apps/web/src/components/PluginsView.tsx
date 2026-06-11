@@ -54,6 +54,16 @@ const USER_SOURCE_KINDS = new Set<PluginSourceKind>([
   'local',
 ]);
 
+const AVAILABLE_WORKFLOW_EXCLUDED_TAGS = new Set([
+  'atom',
+  'design-system',
+  'image-template',
+  'video-template',
+  'audio-template',
+  'example',
+  'template',
+]);
+
 const PLUGINS_TABS: ReadonlyArray<{
   id: PluginsTab;
 }> = [
@@ -124,6 +134,7 @@ export function PluginsView({
   const [marketplaces, setMarketplaces] = useState<PluginMarketplace[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<PluginsTab>('installed');
+  const userSelectedTabRef = useRef(false);
   const [importOpen, setImportOpen] = useState(false);
   const [pendingApplyId, setPendingApplyId] = useState<string | null>(null);
   const [pendingInstallEntry, setPendingInstallEntry] = useState<string | null>(null);
@@ -172,6 +183,13 @@ export function PluginsView({
     () => buildAvailablePlugins(marketplaces, allInstalledPlugins),
     [marketplaces, allInstalledPlugins],
   );
+
+  useEffect(() => {
+    if (loading || userSelectedTabRef.current || activeTab !== 'installed') return;
+    if (userPlugins.length === 0 && availablePlugins.length > 0) {
+      setActiveTab('available');
+    }
+  }, [activeTab, availablePlugins.length, loading, userPlugins.length]);
 
   async function finishImport(
     work: () => Promise<PluginInstallOutcome>,
@@ -350,6 +368,7 @@ export function PluginsView({
                 .filter(Boolean)
                 .join('')}
               onClick={() => {
+                userSelectedTabRef.current = true;
                 trackPluginsTopClick(analytics.track, {
                   page_name: 'plugins',
                   area: 'plugins',
@@ -1757,7 +1776,7 @@ function buildAvailablePlugins(
       installedByName.set(key, plugin);
     }
   }
-  return marketplaces.flatMap((marketplace) => {
+  const plugins = marketplaces.flatMap((marketplace) => {
     const entries = marketplace.manifest.plugins ?? [];
     return entries.flatMap((entry) => {
       const installedPlugin = installedByName.get(normalizePluginName(entry.name)) ?? null;
@@ -1777,6 +1796,34 @@ function buildAvailablePlugins(
       }];
     });
   });
+  return plugins.sort(compareAvailablePlugins);
+}
+
+function compareAvailablePlugins(a: AvailableMarketplacePlugin, b: AvailableMarketplacePlugin): number {
+  const rankA = availablePluginRank(a);
+  const rankB = availablePluginRank(b);
+  if (rankA !== rankB) return rankA - rankB;
+  return availablePluginTitle(a.entry).localeCompare(availablePluginTitle(b.entry));
+}
+
+function availablePluginRank(plugin: AvailableMarketplacePlugin): number {
+  const readyToUse = Boolean(plugin.installedRecord);
+  const workflow = isUserFacingWorkflowEntry(plugin.entry);
+  const openDesignDefaultWorkflow = plugin.entry.name.startsWith('open-design/od-');
+  if (readyToUse && workflow && !openDesignDefaultWorkflow) return 0;
+  if (readyToUse && workflow) return 1;
+  if (workflow) return 2;
+  if (readyToUse) return 3;
+  return 4;
+}
+
+function isUserFacingWorkflowEntry(entry: PluginMarketplaceEntry): boolean {
+  const tags = new Set(entry.tags ?? []);
+  if (!tags.has('scenario')) return false;
+  for (const tag of AVAILABLE_WORKFLOW_EXCLUDED_TAGS) {
+    if (tags.has(tag)) return false;
+  }
+  return true;
 }
 
 function bundledPluginMatchesMarketplaceEntry(
