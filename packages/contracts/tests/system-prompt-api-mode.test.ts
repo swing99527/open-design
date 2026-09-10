@@ -29,7 +29,20 @@ describe('composeSystemPrompt — API mode (#313)', () => {
 
     it('does not instruct agents to ask for a second visual-direction picker', () => {
       const prompt = composeSystemPrompt({});
-      expect(prompt).toContain('Do not emit a direction question-form');
+      /*
+       * 这里曾有一条 `toContain('Do not emit a direction question-form')`,来自
+       * #2579 —— 当年方向选择器**还在**,那条禁令是「有活跃设计体系时别再问一遍」
+       * 的载体,所以断言它在场是合理的。
+       *
+       * OPEND-2760 把设计风格选择整题下线之后它失效了:类型已经不存在,再要求
+       * 提示词里留一句「不要发方向表单」,就是在替模型确认「有个方向表单可以发」。
+       * 仓库对这件事的原则写在
+       * `e2e/tests/question-form-visual-style-retired.test.ts` 的注释里 ——
+       * 「连否定句都不许留」。于是那条正向断言退役,下面三条反向断言留任:
+       * 它们守的是同一个不变量的**正确方向**(提示词里既没有方向表单,也没有
+       * 「去挑一个视觉方向」的指令),而末条继续钉住「有设计体系时直接用它」
+       * 这个正面指令 —— 那才是模型真正需要被告知的东西。
+       */
       expect(prompt).not.toContain('<question-form id="direction"');
       expect(prompt).not.toContain('Pick a visual direction');
       expect(prompt).toContain('if a design system is active and no new brand/reference source was provided, use it as the visual direction without asking again');
@@ -58,6 +71,11 @@ describe('composeSystemPrompt — API mode (#313)', () => {
     it('does not inject the API-mode preamble', () => {
       const prompt = composeSystemPrompt({});
       expect(prompt).not.toMatch(/API mode — no tools available/i);
+    });
+
+    it('carries the on-demand clarification guidance for daemon mode too', () => {
+      const prompt = composeSystemPrompt({});
+      expect(prompt).toContain('Structured clarification on any turn');
     });
   });
 
@@ -106,6 +124,13 @@ describe('composeSystemPrompt — API mode (#313)', () => {
       expect(prompt).toMatch(/state.*plan.*prose|describe.*plan.*prose|plan.*as prose/i);
     });
 
+    it('keeps tool-unavailable details out of user-visible prose', () => {
+      const prompt = composeSystemPrompt({ streamFormat: 'plain' });
+      expect(prompt).toContain('Do not mention tool unavailability to the user');
+      expect(prompt).toContain('Avoid phrases such as "TodoWrite is unavailable"');
+      expect(prompt).toContain('without mentioning missing tools');
+    });
+
     it('explicitly invalidates later "call TodoWrite" / tool-use instructions', () => {
       const prompt = composeSystemPrompt({ streamFormat: 'plain' });
       // The override must say "ignore later instructions that tell you to
@@ -120,6 +145,20 @@ describe('composeSystemPrompt — API mode (#313)', () => {
       expect(prompt).toMatch(/<artifact>/);
     });
 
+    // Regression coverage for the unified ask-user flow: API/BYOK mode must
+    // route material clarification through the same `<question-form>`
+    // Questions-tab surface as daemon mode, not fall back to plain-text
+    // markdown option lists. The API-mode allowed-output list and the
+    // daemon-mirrored guidance must both keep the trigger on demand.
+    it('permits clarification forms when materially needed on any turn', () => {
+      const prompt = composeSystemPrompt({ streamFormat: 'plain' });
+      expect(prompt).toContain('Structured clarification on any turn');
+      expect(prompt).toContain(
+        '<question-form>` blocks when material clarification is needed on any turn',
+      );
+      expect(prompt).not.toMatch(/discovery \(turn 1\)/);
+    });
+
     it('honors metadata.skipDiscoveryBrief before the discovery rules', () => {
       const prompt = composeSystemPrompt({
         streamFormat: 'plain',
@@ -129,8 +168,8 @@ describe('composeSystemPrompt — API mode (#313)', () => {
       const discoveryIdx = prompt.indexOf('# OD core directives');
       expect(skipIdx).toBeGreaterThanOrEqual(0);
       expect(skipIdx).toBeLessThan(discoveryIdx);
-      expect(prompt).toMatch(/do NOT emit `?<question-form id="discovery">`?/i);
-      expect(prompt).toContain('Do not call AskUserQuestion');
+      expect(prompt).toMatch(/do NOT emit a project-opening `?<question-form id="discovery">`?/i);
+      expect(prompt).not.toContain('Do not emit any question form');
       expect(prompt).toContain('choose reasonable defaults for any missing details');
     });
   });

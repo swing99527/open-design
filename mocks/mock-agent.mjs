@@ -21,6 +21,7 @@ import { renderAsCodex }       from './lib/format-codex.mjs';
 import { renderAsClaude }      from './lib/format-claude.mjs';
 import { renderAsGemini }      from './lib/format-gemini.mjs';
 import { renderAsCursorAgent } from './lib/format-cursor-agent.mjs';
+import { renderAsKimi }        from './lib/format-kimi.mjs';
 import { renderAsPlain }       from './lib/format-plain.mjs';
 import { runAcpServer }        from './lib/format-acp.mjs';
 import { runVelaAcpServer }    from './lib/format-vela.mjs';
@@ -28,11 +29,13 @@ import { runVelaLogin, runVelaModels } from './lib/vela-subcommands.mjs';
 
 function parseArgs(argv) {
   const opts = { as: null, noDelay: false, reportFile: null, positionals: [] };
+  const flagsWithValue = new Set(['--as', '--agent', '--report-file', '-p', '--output-format', '--model', '-r']);
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--as' || a === '--agent') { opts.as = argv[++i]; continue; }
     if (a === '--no-delay')              { opts.noDelay = true; continue; }
     if (a === '--report-file')           { opts.reportFile = argv[++i]; continue; }
+    if (flagsWithValue.has(a))           { i++; continue; }
     if (a.startsWith('-')) continue;     // Unknown flag — silently skip (model/permission flags etc.)
     // Anything left is a positional — used by vela subcommand dispatch.
     opts.positionals.push(a);
@@ -48,6 +51,11 @@ function parseArgs(argv) {
     opts.reportFile = process.env.REPORT_FILE;
   }
   return opts;
+}
+
+function failUsage(message) {
+  process.stderr.write(`mock-agent: ${message}\n`);
+  process.exit(2);
 }
 
 async function readStdinIfPiped() {
@@ -66,14 +74,14 @@ async function readStdinIfPiped() {
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   if (!opts.as) {
-    process.stderr.write(
-      'mock-agent: --as <agent> required\n' +
-      '  supported: opencode | claude | codex | gemini | cursor-agent |\n' +
+    failUsage(
+      '--as <agent> required\n' +
+      '  supported: opencode | claude | amp | codex | gemini | cursor-agent |\n' +
       '             deepseek | qwen | grok | plain |\n' +
-      '             devin | hermes | kilo | kimi | kiro | vibe   (ACP)\n' +
+      '             kimi                                         (stream-json)\n' +
+      '             devin | hermes | kilo | kiro | vibe          (ACP)\n' +
       '             vela                                          (AMR — vela CLI)\n',
     );
-    process.exit(2);
   }
 
   // `vela` dispatches by the first positional arg passed by OD (login /
@@ -83,14 +91,33 @@ async function main() {
     const cmd = (opts.positionals[0] || '').trim();
     if (cmd === 'login')  return runVelaLogin();
     if (cmd === 'models') return runVelaModels();
-    // Default: `agent run --runtime opencode` — fall through to the ACP
-    // server below with the vela-flavored protocol.
+    // Only `vela agent run …` is the ACP path. Everything else must fail here
+    // and say so: falling through would start an ACP server that blocks on
+    // stdin forever, and OD calls several one-shot subcommands (`billing
+    // summary`, `billing workspace-snapshot`) whose callers await stdout with
+    // no timeout. One unmodeled subcommand then wedges every request on the
+    // web origin — the browser's six HTTP/1.1 connections all end up parked on
+    // handlers waiting for a mock that will never answer, and the app looks
+    // hung rather than mocked.
+    if (cmd !== 'agent' && cmd !== '') {
+      process.stderr.write(
+        `mock-agent: \`vela ${opts.positionals.join(' ')}\` is not modelled by the mock.\n` +
+        'Modelled: `vela login`, `vela models`, `vela agent run …` (ACP).\n' +
+        'Add a handler in mocks/lib/vela-subcommands.mjs if a test needs this one.\n');
+      process.exit(1);
+    }
+  }
+
+  // Modern Kimi rejects the old `kimi acp ...` launch shape; keep the
+  // shared mock aligned so adapter regressions fail fast in tests.
+  if (opts.as === 'kimi' && opts.positionals.length > 0) {
+    failUsage(`too many arguments: ${opts.positionals.join(' ')}`);
   }
 
   // ACP agents read JSON-RPC messages off stdin one line at a time, so the
   // bulk-prompt buffering logic below doesn't apply — pickRecording sees no
   // prompt for hash-mode (use OD_MOCKS_TRACE or _POOL instead).
-  const ACP_AGENTS = new Set(['devin', 'hermes', 'kilo', 'kimi', 'kiro', 'vibe', 'vela']);
+  const ACP_AGENTS = new Set(['devin', 'hermes', 'kilo', 'kiro', 'vibe', 'vela']);
   const isAcp = ACP_AGENTS.has(opts.as);
   const prompt = isAcp ? '' : await readStdinIfPiped();
   const picked = await pickRecording({ prompt });
@@ -120,26 +147,26 @@ async function main() {
   switch (opts.as) {
     case 'opencode':     await renderAsOpencode(events, renderOpts);    break;
     case 'codex':        await renderAsCodex(events, renderOpts);       break;
-    case 'claude':       await renderAsClaude(events, renderOpts);      break;
+    case 'claude':
+    case 'amp':          await renderAsClaude(events, renderOpts);      break;
     case 'gemini':       await renderAsGemini(events, renderOpts);      break;
     case 'cursor-agent': await renderAsCursorAgent(events, renderOpts); break;
     case 'deepseek':
     case 'qwen':
     case 'grok':
     case 'plain':        await renderAsPlain(events, renderOpts);       break;
+    case 'kimi':         await renderAsKimi(events, renderOpts);        break;
     // ACP family — JSON-RPC server over stdio.
     case 'devin':
     case 'hermes':
     case 'kilo':
-    case 'kimi':
     case 'kiro':
     case 'vibe':         await runAcpServer(events, renderOpts);        break;
     // AMR (vela CLI) — ACP with vela-specific protocol extensions
     // (agentCapabilities + models block + strict set_model gate).
     case 'vela':         await runVelaAcpServer(events, renderOpts);    break;
     default:
-      process.stderr.write(`mock-agent: unknown agent "${opts.as}"\n`);
-      process.exit(2);
+      failUsage(`unknown agent "${opts.as}"`);
   }
 }
 

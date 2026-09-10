@@ -13,7 +13,7 @@ if (typeof HTMLElement.prototype.scrollTo !== 'function') {
   };
 }
 
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ChatPane } from '../../src/components/ChatPane';
 import type { ChatMessage } from '../../src/types';
@@ -25,9 +25,6 @@ type Geom = { scrollHeight: number; clientHeight: number; scrollTop: number };
 let geom: Geom;
 let rafCallbacks: FrameRequestCallback[];
 let resizeCallbacks: ResizeObserverCallback[];
-// All elements passed to any ResizeObserver.observe() call — used to
-// assert that the pinned-todo div is observed so real-browser resizes fire.
-let observedElements: Element[];
 let savedDescriptors: Record<
   'scrollTop' | 'scrollHeight' | 'clientHeight',
   PropertyDescriptor | undefined
@@ -42,7 +39,6 @@ beforeEach(() => {
   geom = { scrollHeight: 1000, clientHeight: 400, scrollTop: 1000 };
   rafCallbacks = [];
   resizeCallbacks = [];
-  observedElements = [];
 
   vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
     rafCallbacks.push(callback);
@@ -54,9 +50,7 @@ beforeEach(() => {
     constructor(callback: ResizeObserverCallback) {
       resizeCallbacks.push(callback);
     }
-    observe = vi.fn((el: Element) => {
-      observedElements.push(el);
-    });
+    observe = vi.fn();
     unobserve = vi.fn();
     disconnect = vi.fn();
   }
@@ -99,7 +93,6 @@ afterEach(() => {
   vi.restoreAllMocks();
   rafCallbacks = [];
   resizeCallbacks = [];
-  observedElements = [];
   if (originalResizeObserver) {
     Object.defineProperty(globalThis, 'ResizeObserver', {
       configurable: true,
@@ -127,7 +120,7 @@ async function flushFrames() {
   });
 }
 
-// Build a message set that includes a TodoWrite event so PinnedTodoSlot renders.
+// Build a message set that includes a TodoWrite event so the inline TodoCard renders.
 function messagesWithTodo(taskCount: number): ChatMessage[] {
   const todos = Array.from({ length: taskCount }, (_, i) => ({
     content: `Task ${i + 1}`,
@@ -152,6 +145,137 @@ function messagesWithTodo(taskCount: number): ChatMessage[] {
   ];
 }
 
+function messagesWithTwoTodoSnapshots(): ChatMessage[] {
+  return [
+    { id: 'u1', role: 'user' as const, content: 'build something', createdAt: Date.now() },
+    {
+      id: 'a1',
+      role: 'assistant' as const,
+      content: 'planning',
+      createdAt: Date.now(),
+      events: [
+        {
+          kind: 'tool_use' as const,
+          id: 'tw-1',
+          name: 'TodoWrite',
+          input: {
+            todos: [
+              { content: 'Task 1', status: 'pending' },
+              { content: 'Task 2', status: 'pending' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      id: 'a2',
+      role: 'assistant' as const,
+      content: 'working',
+      createdAt: Date.now(),
+      events: [
+        {
+          kind: 'tool_use' as const,
+          id: 'tw-2',
+          name: 'TodoWrite',
+          input: {
+            todos: [
+              { content: 'Task 1', status: 'completed' },
+              { content: 'Task 2 updated', status: 'in_progress' },
+            ],
+          },
+        },
+      ],
+    },
+  ];
+}
+
+function messagesWithTodoThenDone(): ChatMessage[] {
+  return [
+    { id: 'u1', role: 'user' as const, content: 'build something', createdAt: Date.now() },
+    {
+      id: 'a1',
+      role: 'assistant' as const,
+      content: 'planning',
+      createdAt: Date.now(),
+      events: [
+        {
+          kind: 'tool_use' as const,
+          id: 'tw-1',
+          name: 'TodoWrite',
+          input: {
+            todos: [
+              { content: 'Task 1 updated', status: 'in_progress' },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      id: 'a2',
+      role: 'assistant' as const,
+      content: 'done',
+      createdAt: Date.now(),
+      events: [
+        {
+          kind: 'tool_use' as const,
+          id: 'tw-2',
+          name: 'TodoWrite',
+          input: {
+            todos: [
+              { content: 'Task 1 updated', status: 'completed' },
+            ],
+          },
+        },
+      ],
+    },
+  ];
+}
+
+function messageWithTodoBetweenProse(): ChatMessage[] {
+  return [
+    { id: 'u1', role: 'user' as const, content: 'build something', createdAt: Date.now() },
+    {
+      id: 'a1',
+      role: 'assistant' as const,
+      content: 'Before todo.\n\nAfter todo.',
+      createdAt: Date.now(),
+      events: [
+        {
+          kind: 'text' as const,
+          text: 'Before todo.',
+        },
+        {
+          kind: 'tool_use' as const,
+          id: 'tw-1',
+          name: 'TodoWrite',
+          input: {
+            todos: [
+              { content: 'Task 1', status: 'pending' },
+            ],
+          },
+        },
+        {
+          kind: 'text' as const,
+          text: 'After todo.',
+        },
+      ],
+    },
+  ];
+}
+
+function longConversationWithEarlyTodo(): ChatMessage[] {
+  const messages = messagesWithTodo(2);
+  for (let i = 0; i < 90; i += 1) {
+    messages.push({
+      id: `tail-${i}`,
+      role: i % 2 === 0 ? 'user' : 'assistant',
+      content: `tail message ${i}`,
+      createdAt: Date.now() + i + 1,
+    });
+  }
+  return messages;
+}
+
 function chatPaneEl(messages: ChatMessage[]) {
   return (
     <ChatPane
@@ -171,69 +295,23 @@ function chatPaneEl(messages: ChatMessage[]) {
   );
 }
 
-describe('chat-log autoscroll when pinned todo card grows', () => {
-  it('observes the pinned-todo element so its resize triggers the bottom-pin follow', async () => {
-    // The PinnedTodoSlot lives outside the chat-log scroll container.
-    // When the todo card grows, the chat-log viewport (clientHeight)
-    // shrinks. The ResizeObserver must observe the pinned-todo div so
-    // `followLatestIfPinned` fires and corrects the scroll position.
-    render(chatPaneEl(messagesWithTodo(3)));
+describe('Todo 清单只出现一次(B17)', () => {
+  /*
+   * 钉在输入框上方的那张 TodoCard 已经退场:同一份清单不再显示两处,
+   * 它现在只在执行记录里以「执行计划 · N 步」+ 分段出现(D29 / 组件 7)。
+   *
+   * 这一组原来有四条钉卡专属断言,连同被删的组件一起作废。留下的是**仍然成立的那条不变量**:
+   * 一份快照在屏幕上只画一次。
+   *
+   * ⚠️ 随钉卡一起消失的还有「继续未完成任务」那颗按钮 —— 它是已上线能力,
+   * 稿子没画它该搬去哪,记为 T33,**未解决前不提测**。这里不为它写测试,
+   * 因为「它现在没有入口」不是我们想固化的行为。
+   */
+  it('输入框上方不再有钉住的清单卡', async () => {
+    const { container } = render(chatPaneEl(messagesWithTodo(4)));
     await flushFrames();
-
-    const pinnedTodoEl = document.querySelector('.chat-pinned-todo');
-    expect(pinnedTodoEl, 'PinnedTodoSlot should render with a TodoWrite message').not.toBeNull();
-
-    // The pinned-todo element must be registered with the ResizeObserver
-    // so that real-browser growth of the todo card triggers followLatestIfPinned.
-    expect(observedElements).toContain(pinnedTodoEl);
-  });
-
-  it('re-observes the pinned-todo element when a TodoWrite snapshot first mounts', async () => {
-    // Start with no TodoWrite — PinnedTodoSlot should be absent.
-    const { rerender } = render(chatPaneEl([]));
-    await flushFrames();
-    expect(document.querySelector('.chat-pinned-todo')).toBeNull();
-
-    // Add messages with a TodoWrite — PinnedTodoSlot mounts for the first time.
-    await act(async () => {
-      rerender(chatPaneEl(messagesWithTodo(2)));
-      await Promise.resolve();
-    });
-    await flushFrames();
-
-    const pinnedTodoEl = document.querySelector('.chat-pinned-todo');
-    expect(pinnedTodoEl, 'PinnedTodoSlot should render when messages include a TodoWrite').not.toBeNull();
-
-    // The pane-level MutationObserver re-syncs the ResizeObserver when
-    // PinnedTodoSlot mounts. The new element must be registered so real-browser
-    // growth of the card triggers followLatestIfPinned.
-    expect(observedElements).toContain(pinnedTodoEl);
-  });
-
-  it('scrolls to the bottom when pinned and the todo card grows', async () => {
-    // Start pinned: scrollTop == scrollHeight (user is at the very bottom).
-    geom = { scrollHeight: 1000, clientHeight: 400, scrollTop: 1000 };
-    render(chatPaneEl(messagesWithTodo(2)));
-    await flushFrames();
-
-    // The initial-bottom-scroll effect fires and confirms pinnedToBottomRef = true.
-    // Now simulate the todo card growing: the viewport (clientHeight) shrinks,
-    // which means the user can no longer see the latest content even though
-    // scrollTop is still at its old value. The ResizeObserver callback should
-    // fire followLatestIfPinned, which snaps scrollTop back to scrollHeight.
-    geom = { ...geom, clientHeight: 300, scrollHeight: 1000, scrollTop: 600 };
-
-    await act(async () => {
-      const callbacks = [...resizeCallbacks];
-      callbacks.forEach((callback) => callback([], {} as ResizeObserver));
-      await Promise.resolve();
-    });
-    await flushFrames();
-
-    // followLatestIfPinned fires from the shared callback and snaps scrollTop
-    // to scrollHeight (1000). The structural guarantee that the pinned-todo
-    // element is observed (tested separately above) ensures this path runs in
-    // the real browser when the card grows.
-    expect(geom.scrollTop).toBe(1000);
+    // 同上,按类名查是对的:B17 让钉在输入框上方的清单卡退场,
+    // 这一条钉的就是那块 DOM 不许回来。
+    expect(container.querySelector('.chat-pinned-todo')).toBeNull();
   });
 });
